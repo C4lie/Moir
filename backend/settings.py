@@ -138,7 +138,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'frontend/dist/assets',
+    BASE_DIR / 'frontend/dist',
 ]
 
 # Media files
