@@ -19,8 +19,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Use relative path for production, fallback to localhost for dev
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8000/api';
+// Hardcoded for production stability
+const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

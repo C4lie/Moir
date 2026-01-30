@@ -4,7 +4,7 @@ import { Save, ArrowLeft, Calendar, FileText, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDebounce } from '../hooks/useDebounce';
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8000/api';
+const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
 
 interface Notebook {
   id: number;

@@ -159,7 +159,8 @@ REST_FRAMEWORK = {
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
-    'http://127.0.0.1:5173',  # Critical for cookie sharing
+    'http://127.0.0.1:5173',
+    'https://chandril.pythonanywhere.com',
 ]
 
 # Session cookie settings - CRITICAL for cross-origin requests

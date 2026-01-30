@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Book, X, PenTool } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8000/api';
+const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
 
 interface Notebook {
   id: number;

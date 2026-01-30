@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Clock, Hash } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8000/api';
+const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
 
 interface InsightsData {
   has_enough_data: boolean;
