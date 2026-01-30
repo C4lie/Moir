@@ -1,0 +1,363 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Book, X, PenTool } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const API_BASE_URL = 'http://localhost:8000/api';
+
+interface Notebook {
+  id: number;
+  name: string;
+  description: string;
+  color_theme: string;
+  entry_count?: number;
+}
+
+export default function Notebooks() {
+  const navigate = useNavigate();
+  const [notebooks, setNotebooks] = useState<Notebook[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingNotebook, setEditingNotebook] = useState<Notebook | null>(null);
+
+  useEffect(() => {
+    fetchNotebooks();
+  }, []);
+
+  const fetchNotebooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/notebooks/`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const notebooksWithCounts = await Promise.all(
+          data.map(async (notebook: Notebook) => {
+            const entriesResponse = await fetch(
+              `${API_BASE_URL}/entries/?notebook=${notebook.id}`,
+              { credentials: 'include' }
+            );
+            const entries = await entriesResponse.json();
+            return { ...notebook, entry_count: entries.length };
+          })
+        );
+        setNotebooks(notebooksWithCounts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notebooks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateNotebook = () => {
+    setEditingNotebook(null);
+    setShowModal(true);
+  };
+
+  const handleEditNotebook = (notebook: Notebook) => {
+    setEditingNotebook(notebook);
+    setShowModal(true);
+  };
+
+  const handleDeleteNotebook = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this notebook? All entries in it will also be deleted.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notebooks/${id}/`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setNotebooks(notebooks.filter(n => n.id !== id));
+      }
+    } catch (error) {
+      console.error('Failed to delete notebook:', error);
+      alert('Failed to delete notebook. Please try again.');
+    }
+  };
+
+  const handleNotebookSaved = () => {
+    fetchNotebooks();
+    setShowModal(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-sage-900">Your Notebooks</h1>
+          <p className="text-sage-600 mt-1">Organize your thoughts in dedicated spaces</p>
+        </div>
+        <button
+            onClick={handleCreateNotebook}
+            className="btn-primary flex items-center gap-2 shadow-lg shadow-sage-200"
+        >
+            <Plus size={20} />
+            New Notebook
+        </button>
+      </div>
+
+      {notebooks.length === 0 ? (
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-24 bg-white rounded-2xl border-2 border-dashed border-sage-200"
+        >
+          <div className="w-20 h-20 bg-sage-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Book className="w-10 h-10 text-sage-400" />
+          </div>
+          <h3 className="text-xl font-medium text-sage-900 mb-2">No notebooks yet</h3>
+          <p className="text-sage-500 mb-6 max-w-sm mx-auto">Create your first notebook to start organizing your daily journals and thoughts.</p>
+          <button onClick={handleCreateNotebook} className="btn-primary">
+            Create Notebook
+          </button>
+        </motion.div>
+      ) : (
+        <motion.div 
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence>
+            {notebooks.map((notebook) => (
+              <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                key={notebook.id}
+                className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-sage-100 overflow-hidden"
+              >
+                {/* Color strip */}
+                <div 
+                    className="h-2 w-full" 
+                    style={{ backgroundColor: notebook.color_theme || '#9fb09f' }}
+                />
+                
+                <div className="p-6">
+                  <div 
+                    className="cursor-pointer" 
+                    onClick={() => navigate(`/notebook/${notebook.id}`)}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-serif font-semibold text-sage-900 group-hover:text-sage-700 transition-colors">
+                        {notebook.name}
+                        </h3>
+                        <span className="text-xs font-medium bg-sage-50 text-sage-600 px-2 py-1 rounded-full">
+                            {notebook.entry_count || 0} entries
+                        </span>
+                    </div>
+                    
+                    <p className="text-sage-600 text-sm mb-6 line-clamp-2 min-h-[2.5rem]">
+                      {notebook.description || 'No description provided.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-4 border-t border-sage-50">
+                    <button
+                        onClick={() => navigate(`/write?notebook=${notebook.id}`)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-sage-700 bg-sage-50 hover:bg-sage-100 rounded-lg transition-colors"
+                    >
+                        <PenTool size={16} />
+                        Write
+                    </button>
+                    <button
+                      onClick={() => handleEditNotebook(notebook)}
+                      className="p-2 text-sage-400 hover:text-sage-600 hover:bg-sage-50 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteNotebook(notebook.id)}
+                      className="p-2 text-sage-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
+
+      {/* Notebook Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <NotebookModal
+            notebook={editingNotebook}
+            onClose={() => setShowModal(false)}
+            onSaved={handleNotebookSaved}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Notebook Modal Component
+interface NotebookModalProps {
+  notebook: Notebook | null;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+function NotebookModal({ notebook, onClose, onSaved }: NotebookModalProps) {
+  const [name, setName] = useState(notebook?.name || '');
+  const [description, setDescription] = useState(notebook?.description || '');
+  const [colorTheme, setColorTheme] = useState(notebook?.color_theme || '#9fb09f');
+  const [saving, setSaving] = useState(false);
+
+  const colors = [
+    '#9fb09f', // Sage
+    '#64748b', // Slate
+    '#94a3b8', // Cool Gray
+    '#d4a373', // Earth
+    '#e76f51', // Terra Cotta
+    '#2a9d8f', // Teal
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const url = notebook
+        ? `${API_BASE_URL}/notebooks/${notebook.id}/`
+        : `${API_BASE_URL}/notebooks/`;
+
+      const method = notebook ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name,
+          description,
+          color_theme: colorTheme,
+        }),
+      });
+
+      if (response.ok) {
+        onSaved();
+      } else {
+        alert('Failed to save notebook. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to save notebook:', error);
+      alert('Failed to save notebook. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-sage-900/20 backdrop-blur-sm"
+        />
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative z-10"
+        >
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-serif font-bold text-sage-900">
+                    {notebook ? 'Edit Notebook' : 'Create New Notebook'}
+                </h3>
+                <button onClick={onClose} className="text-sage-400 hover:text-sage-600 transition-colors">
+                    <X size={24} />
+                </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-sage-700 mb-1">
+                Name
+                </label>
+                <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="input-field"
+                placeholder="e.g., Daily Reflections"
+                required
+                autoFocus
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-sage-700 mb-1">
+                Description (optional)
+                </label>
+                <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="input-field min-h-[80px]"
+                rows={3}
+                placeholder="What is this notebook for?"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-sage-700 mb-2">
+                Color Theme
+                </label>
+                <div className="flex flex-wrap gap-3">
+                {colors.map((color) => (
+                    <button
+                        key={color}
+                        type="button"
+                        onClick={() => setColorTheme(color)}
+                        className={`w-8 h-8 rounded-full transition-transform ring-2 ring-offset-2 ${
+                            colorTheme === color ? 'scale-110 ring-sage-400' : 'ring-transparent hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: color }}
+                    />
+                ))}
+                </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+                <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 btn-secondary"
+                disabled={saving}
+                >
+                Cancel
+                </button>
+                <button
+                type="submit"
+                className="flex-1 btn-primary"
+                disabled={saving}
+                >
+                {saving ? 'Saving...' : notebook ? 'Save Changes' : 'Create Notebook'}
+                </button>
+            </div>
+            </form>
+        </motion.div>
+    </div>
+  );
+}
