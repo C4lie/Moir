@@ -48,6 +48,13 @@ class LoginView(APIView):
         user = authenticate(username=user.username, password=password)
         
         if user:
+            # Prevent admin/staff from logging in via frontend
+            if user.is_staff or user.is_superuser:
+                return Response(
+                    {'error': 'Admin accounts cannot log in to the frontend app. Please use the Django Admin panel.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             login(request, user)
             return Response(UserSerializer(user).data)
         
@@ -66,13 +73,17 @@ class LogoutView(APIView):
         return Response({'message': 'Logged out successfully'})
 
 
-class CurrentUserView(generics.RetrieveAPIView):
-    """Get current authenticated user"""
+class CurrentUserView(generics.RetrieveUpdateAPIView):
+    """Get and update current authenticated user"""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Admin accounts cannot access the frontend app.")
+        return user
 
 
 class NotebookViewSet(viewsets.ModelViewSet):
@@ -178,3 +189,19 @@ def calendar_view(request, year, month):
     
     result = {str(e['entry_date']): e['count'] for e in entries}
     return Response(result)
+
+
+from entries.analysis import generate_weekly_insight
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def weekly_insight_view(request):
+    """Get weekly thought summary and insights"""
+    try:
+        data = generate_weekly_insight(request.user)
+        return Response(data)
+    except Exception as e:
+        return Response(
+             {'error': str(e)},
+             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

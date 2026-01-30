@@ -12,6 +12,8 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -103,6 +105,10 @@ export default function Register() {
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
+
+
+
+
         </form>
 
         <p className="mt-6 text-center text-gray-600">

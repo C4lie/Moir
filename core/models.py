@@ -3,4 +3,5 @@ from django.db import models
 
 class User(AbstractUser):
     """Custom User model extending Django's AbstractUser"""
-    pass
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True)

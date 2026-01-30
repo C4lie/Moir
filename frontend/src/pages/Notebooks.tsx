@@ -11,6 +11,7 @@ interface Notebook {
   description: string;
   color_theme: string;
   entry_count?: number;
+  include_in_weekly_summary?: boolean;
 }
 
 export default function Notebooks() {
@@ -19,6 +20,8 @@ export default function Notebooks() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingNotebook, setEditingNotebook] = useState<Notebook | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [notebookToDelete, setNotebookToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     fetchNotebooks();
@@ -60,10 +63,15 @@ export default function Notebooks() {
     setShowModal(true);
   };
 
-  const handleDeleteNotebook = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this notebook? All entries in it will also be deleted.')) {
-      return;
-    }
+  const handleDeleteNotebook = (id: number) => {
+    setNotebookToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteNotebook = async () => {
+    if (!notebookToDelete) return;
+    
+    const id = notebookToDelete;
 
     try {
       const response = await fetch(`${API_BASE_URL}/notebooks/${id}/`, {
@@ -77,6 +85,9 @@ export default function Notebooks() {
     } catch (error) {
       console.error('Failed to delete notebook:', error);
       alert('Failed to delete notebook. Please try again.');
+    } finally {
+      setShowDeleteModal(false);
+      setNotebookToDelete(null);
     }
   };
 
@@ -204,6 +215,52 @@ export default function Notebooks() {
           />
         )}
       </AnimatePresence>
+
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowDeleteModal(false)}
+                className="absolute inset-0 bg-sage-900/20 backdrop-blur-sm"
+            />
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm relative z-10 text-center"
+            >
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trash2 className="text-red-600" size={24} />
+                </div>
+                <h3 className="text-xl font-serif font-bold text-sage-900 mb-2">
+                    Delete Notebook?
+                </h3>
+                <p className="text-sage-600 mb-6">
+                    Are you sure you want to delete this notebook? All entries inside it will be permanently removed.
+                </p>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => setShowDeleteModal(false)}
+                        className="flex-1 btn-secondary"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={confirmDeleteNotebook}
+                        className="flex-1 bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -219,6 +276,7 @@ function NotebookModal({ notebook, onClose, onSaved }: NotebookModalProps) {
   const [name, setName] = useState(notebook?.name || '');
   const [description, setDescription] = useState(notebook?.description || '');
   const [colorTheme, setColorTheme] = useState(notebook?.color_theme || '#9fb09f');
+  const [includeInSummary, setIncludeInSummary] = useState(notebook?.include_in_weekly_summary || false);
   const [saving, setSaving] = useState(false);
 
   const colors = [
@@ -251,6 +309,7 @@ function NotebookModal({ notebook, onClose, onSaved }: NotebookModalProps) {
           name,
           description,
           color_theme: colorTheme,
+          include_in_weekly_summary: includeInSummary,
         }),
       });
 
@@ -319,6 +378,33 @@ function NotebookModal({ notebook, onClose, onSaved }: NotebookModalProps) {
                 placeholder="What is this notebook for?"
                 />
             </div>
+
+            {/* Privacy Toggle */}
+             <div className="flex items-center justify-between p-3 bg-sage-50 rounded-lg border border-sage-100">
+                <div className="flex-1 mr-4">
+                    <label className="text-sm font-medium text-sage-900">Include in Weekly Summary</label>
+                    <p className="text-xs text-sage-500">Allow Moir to generate privacy-focused insights from this notebook.</p>
+                </div>
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={includeInSummary}
+                    onClick={() => setIncludeInSummary(!includeInSummary)}
+                    className={`
+                        relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sage-600 focus:ring-offset-2
+                        ${includeInSummary ? 'bg-sage-600' : 'bg-gray-200'}
+                    `}
+                >
+                    <span
+                        aria-hidden="true"
+                        className={`
+                            pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
+                            ${includeInSummary ? 'translate-x-5' : 'translate-x-0'}
+                        `}
+                    />
+                </button>
+            </div>
+
 
             <div>
                 <label className="block text-sm font-medium text-sage-700 mb-2">

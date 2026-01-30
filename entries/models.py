@@ -8,6 +8,7 @@ class Notebook(models.Model):
     description = models.TextField(blank=True)
     color_theme = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    include_in_weekly_summary = models.BooleanField(default=False, verbose_name="Include in Weekly Summary")
 
     class Meta:
         ordering = ['-created_at']

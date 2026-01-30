@@ -29,7 +29,13 @@ export default function WriteEntry() {
   const [entry, setEntry] = useState<Entry>({
     title: '',
     content: '',
-    entry_date: new Date().toISOString().split('T')[0],
+    entry_date: (() => {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    })(),
     notebook: notebookParam ? parseInt(notebookParam) : 0,
   });
   const [lastSaved, setLastSaved] = useState<string>('');

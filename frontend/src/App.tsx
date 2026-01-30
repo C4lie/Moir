@@ -10,6 +10,7 @@ import Notebooks from './pages/Notebooks';
 import NotebookDetail from './pages/NotebookDetail';
 import Calendar from './pages/Calendar';
 import Search from './pages/Search';
+import WeeklyReflection from './pages/WeeklyReflection';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/notebook/:id" element={<NotebookDetail />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/weekly-reflection" element={<WeeklyReflection />} />
             {/* Catch all redirect to dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Route>

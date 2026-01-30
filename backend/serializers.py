@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model"""
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'date_joined')
+        fields = ('id', 'username', 'email', 'date_joined', 'first_name', 'occupation', 'avatar')
         read_only_fields = ('date_joined',)
 
 
@@ -51,7 +51,7 @@ class NotebookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notebook
-        fields = ('id', 'name', 'description', 'color_theme', 'created_at', 'entry_count')
+        fields = ('id', 'name', 'description', 'color_theme', 'created_at', 'entry_count', 'include_in_weekly_summary')
         read_only_fields = ('created_at',)
 
     def get_entry_count(self, obj):
