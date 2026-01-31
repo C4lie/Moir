@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+const API_BASE_URL = '/api';
 
 interface CalendarData {
   [date: string]: number;

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Edit, Trash2, ArrowLeft, Calendar, Book, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+const API_BASE_URL = '/api';
 
 interface Entry {
   id: number;

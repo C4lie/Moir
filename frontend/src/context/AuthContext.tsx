@@ -19,8 +19,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hardcoded for production stability
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+// Relative path for Vercel (same domain)
+const API_BASE_URL = '/api';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

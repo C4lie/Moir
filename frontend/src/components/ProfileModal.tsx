@@ -8,7 +8,7 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+const API_BASE_URL = '/api';
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { user } = useAuth();

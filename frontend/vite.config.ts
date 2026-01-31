@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   base: '/static/',
   resolve: {
-    host: true, // Listen on all addresses (including 127.0.0.1)
-    port: 5173,
+    alias: {
+      '@': '/src',
+    },
   },
 })

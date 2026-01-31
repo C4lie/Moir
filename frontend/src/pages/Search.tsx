@@ -4,7 +4,7 @@ import { ArrowLeft, Search as SearchIcon, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '../hooks/useDebounce';
 
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+const API_BASE_URL = '/api';
 
 interface Entry {
   id: number;

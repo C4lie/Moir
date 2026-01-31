@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { BookOpen, PenLine, Trophy, Book } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = 'https://chandril.pythonanywhere.com/api';
+const API_BASE_URL = '/api';
 
 interface Entry {
   id: number;
