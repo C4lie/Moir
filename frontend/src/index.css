@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    overscroll-behavior: none;
+  }
+  
+  body {
+    @apply bg-paper text-primary-800 font-sans antialiased;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight text-primary-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors shadow-sm active:transform active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-white text-sage-700 border border-sage-200 rounded-lg font-medium hover:bg-sage-50 transition-colors shadow-sm active:transform active:scale-95;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-primary-100 p-6;
+  }
+}
